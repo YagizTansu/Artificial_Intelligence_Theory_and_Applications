@@ -1,0 +1,44 @@
+Self-Organizing Maps (SOMs)
+Self-Organizing Maps (SOMs) are feed-forward neural networks with a two-layered structure. They have local connections only among 
+neighboring output neurons, meaning each neuron is only connected to its neighboring neurons.
+
+Each layer receives data from the previous layer and passes its output to the next layer. SOMs consist of two layers:
+
+Input Layer: Receives a high-dimensional dataset from the outside.
+Output Layer: Calculates the final result.
+
+Input Layer
+The input layer consists of neurons that represent the features of the input data. Each neuron in the input layer corresponds to one component of the input feature vector. The input neurons are fully connected to all neurons in the output layer.
+
+Output Layer
+In the output layer, each neuron calculates a distance function between the input vector and its weight vector. The activation function 
+of each output neuron is a radial function. Radial functions are monotonically non-decreasing functions. A neighborhood relationship is 
+defined for the output neurons. These neurons are arranged in a grid-like structure, usually two-dimensional. This grid structure ensures 
+that data points that are close in the original high-dimensional space remain close in the lower-dimensional clustered space. This helps in 
+preserving the relationships among input features and provides an intuitive representation of data clusters. The grid can be either 
+quadratic or hexagonal.
+
+Topology Preservation
+One of the key advantages of SOMs is their ability to reduce the dimensionality of input data while preserving its structure. 
+This means that similar input data points remain close together in the mapped lower-dimensional space, maintaining the relationships 
+that existed in the original dataset. By doing so, SOMs provide an interpretable representation of complex data, making it easier to 
+identify patterns and clusters.
+
+Training Process
+Since SOMs use unsupervised learning, the training process must consider neighborhood relationships. To maintain these relationships, 
+SOMs use a radial neighborhood function. This function determines whether a neuron should be updated based on its distance from the 
+winning neuron. Multiple neurons can be updated at the same time, but neurons farther from the winner neuron are updated less strongly.
+
+Training Steps
+1-Initialize weight vectors randomly.
+2-Select a random training data point.
+3-Find the winner neuron, which has the smallest distance to the data point.
+4-Update the weights of the winner neuron and its neighboring neurons based on their distance from the winner.
+
+Why the Learning Rate Must Decrease Over Time
+At the beginning of training, a high learning rate allows the SOM to make significant adjustments, rapidly organizing the weight vectors to 
+approximate the input space. However, as training progresses, a high learning rate could cause instability, preventing fine-tuning and 
+convergence to a stable structure. To ensure smooth convergence, the learning rate must decrease over time. This allows the SOM to make 
+large-scale adjustments in the early stages and fine-tune its representation in later stages, ultimately preserving the neighborhood 
+relationships and maintaining a well-organized map structure. Similarly, the neighborhood radius also decreases over time, refining the 
+local structure while preserving global patterns.
