@@ -55,9 +55,20 @@ def initialize_som(data, grid_size=10, sigma=1.0, learning_rate=0.5):
     som_dim = grid_size
     input_dim = data.shape[1]
     
+    # Define a safe decay function that handles edge cases
+    def safe_decay(x, max_iter, t):
+        # Prevent division by zero
+        if max_iter <= 0:
+            return x
+        # Ensure max_iter is large enough to prevent division by very small numbers
+        safe_max = max(max_iter, 1.0)
+        # Apply decay formula with protection against division by zero
+        return x / (1.0 + t / (safe_max / 2.0))
+    
     som = MiniSom(som_dim, som_dim, input_dim, 
                   sigma=sigma, learning_rate=learning_rate,
-                  neighborhood_function='gaussian')
+                  neighborhood_function='gaussian',
+                  decay_function=safe_decay)
     
     # Initialize weights randomly
     som.random_weights_init(data)
@@ -187,61 +198,99 @@ def visualize_som_training(data, labels=None, grid_size=10, max_iter=1000,
         line, = ax2.plot(projection[:,j,0], projection[:,j,1], 'gray', alpha=0.5)
         line_segments.append(line)
     
+    # Keep track of the total iterations performed
+    total_iterations_done = [0]
+    training_complete = [False]
+    
+    # Calculate current learning rate and sigma based on iteration
+    def get_current_parameters(initial_lr, initial_sigma, iteration, max_iter):
+        """Calculate current learning rate and sigma with decay"""
+        # Common decay function with protection against division by zero
+        if max_iter <= 0:
+            return initial_lr, initial_sigma
+        
+        safe_max = max(max_iter, 1.0)
+        current_lr = initial_lr / (1.0 + iteration / (safe_max / 2.0))
+        current_sigma = initial_sigma / (1.0 + iteration / (safe_max / 2.0))
+        return current_lr, current_sigma
+    
     # Animation update function
     def update(frame):
-        # Train SOM for a batch of iterations
-        iterations_per_frame = max(1, max_iter // 100)
-        
-        if frame * iterations_per_frame < max_iter:
-            for i in range(iterations_per_frame):
-                # Pick a random sample
-                idx = np.random.randint(len(data))
-                current_iter = frame * iterations_per_frame + i
+        # Only update if training is not complete
+        if not training_complete[0]:
+            # Train SOM for a batch of iterations - slower for better visualization
+            iterations_per_frame = max(1, max_iter // 200) if max_iter > 0 else 1
+            
+            # Calculate how many iterations we should do in this frame
+            remaining_iters = max(0, max_iter - total_iterations_done[0])
+            iters_this_frame = min(iterations_per_frame, remaining_iters)
+            
+            if iters_this_frame > 0:
+                for i in range(iters_this_frame):
+                    # Pick a random sample
+                    idx = np.random.randint(len(data))
+                    current_iter = total_iterations_done[0]
+                    
+                    try:
+                        # Calculate current learning rate and sigma
+                        current_lr, current_sigma = get_current_parameters(
+                            learning_rate, sigma, current_iter, max_iter)
+                        
+                        # Update the SOM weights
+                        winner = som.winner(data[idx])
+                        som.update(data[idx], winner, current_iter, max(1, max_iter))  # Ensure max_iter is at least 1
+                        
+                        # Increment the iteration counter
+                        total_iterations_done[0] += 1
+                    except Exception as e:
+                        print(f"Error during update: {e}")
+                        training_complete[0] = True
+                        break
                 
-                # Fix: Use correct method call for som.update with t and max_iteration parameters
-                winner = som.winner(data[idx])
-                som.update(data[idx], winner, current_iter, max_iter)
+                # Update U-Matrix
+                u_matrix = compute_u_matrix(som, data)
+                u_matrix_img.set_array(u_matrix)
                 
-            # Update U-Matrix
-            u_matrix = compute_u_matrix(som, data)
-            u_matrix_img.set_array(u_matrix)
-            
-            # Update weights visualization
-            weights = som.get_weights()
-            if data.shape[1] > 2:
-                projection = np.copy(weights[:,:,:2])
-            else:
-                projection = np.copy(weights)
+                # Update weights visualization
+                weights = som.get_weights()
+                if data.shape[1] > 2:
+                    projection = np.copy(weights[:,:,:2])
+                else:
+                    projection = np.copy(weights)
+                    
+                grid_img.set_offsets(np.column_stack([projection[:,:,0].flatten(), 
+                                                    projection[:,:,1].flatten()]))
                 
-            grid_img.set_offsets(np.column_stack([projection[:,:,0].flatten(), 
-                                                projection[:,:,1].flatten()]))
-            
-            # Update grid lines
-            for i in range(grid_size):
-                line_segments[i].set_data(projection[i,:,0], projection[i,:,1])
-            
-            for j in range(grid_size):
-                line_segments[grid_size + j].set_data(projection[:,j,0], projection[:,j,1])
-            
-            progress = (frame * iterations_per_frame) / max_iter * 100
-            
-            # Fix: Access the learning rate and sigma as properties with underscore prefix
-            # or remove them if they're not accessible
-            try:
-                lr = som._learning_rate if hasattr(som, '_learning_rate') else '?'
-                sg = som._sigma if hasattr(som, '_sigma') else '?'
-                param_text = f"Learning Rate: {lr}, Sigma: {sg}" if lr != '?' else ""
-            except:
-                param_text = ""
-            
-            step_text.set_text(f"Training Progress: {progress:.1f}% \n"
-                               f"Iteration: {frame * iterations_per_frame}/{max_iter}\n"
-                               f"{param_text}")
+                # Update grid lines
+                for i in range(grid_size):
+                    line_segments[i].set_data(projection[i,:,0], projection[i,:,1])
+                
+                for j in range(grid_size):
+                    line_segments[grid_size + j].set_data(projection[:,j,0], projection[:,j,1])
+                
+                progress = total_iterations_done[0] / max_iter * 100
+                
+                # Get current learning rate and sigma
+                current_lr, current_sigma = get_current_parameters(
+                    learning_rate, sigma, total_iterations_done[0], max_iter)
+                
+                param_text = f"Learning Rate: {current_lr:.4f}, Sigma: {current_sigma:.4f}"
+                
+                step_text.set_text(f"Training Progress: {progress:.1f}% \n"
+                                   f"Iteration: {total_iterations_done[0]}/{max_iter}\n"
+                                   f"{param_text}")
+                
+                # Check if we've reached the maximum iterations
+                if total_iterations_done[0] >= max_iter:
+                    training_complete[0] = True
+                    step_text.set_text(f"Training Complete: 100% \n"
+                                      f"Iteration: {max_iter}/{max_iter}\n"
+                                      f"{param_text}\n\nClick close to view final results")
             
         return [grid_img, u_matrix_img, step_text] + line_segments
     
-    # Create animation
-    ani = FuncAnimation(fig, update, frames=100, interval=50, blit=True)
+    # Create animation with slower interval for better visualization
+    ani = FuncAnimation(fig, update, frames=210, interval=100, blit=True, repeat=False)
     plt.tight_layout()
     plt.show()
     
@@ -351,7 +400,7 @@ def main():
                        help='Dataset to use (random or iris)')
     parser.add_argument('--grid_size', type=int, default=10,
                        help='Size of the SOM grid')
-    parser.add_argument('--iterations', type=int, default=5000,
+    parser.add_argument('--iterations', type=int, default=100000,
                        help='Number of training iterations')
     
     args = parser.parse_args()
@@ -363,11 +412,11 @@ def main():
     print(f"Dataset: {dataset_type}")
     print(f"Dataset shape: {data.shape}")
     
-    # Set SOM parameters
-    grid_size = args.grid_size
-    max_iter = args.iterations
-    sigma = 1.0
-    learning_rate = 0.5
+    # Set SOM parameters with validation
+    grid_size = max(2, args.grid_size)  # Ensure grid size is at least 2
+    max_iter = max(100, args.iterations)  # Ensure at least 100 iterations
+    sigma = 2.0  # Increased initial sigma for better neighborhood effect
+    learning_rate = 0.8  # Increased initial learning rate
     
     # Train and visualize SOM
     print("Training SOM with real-time visualization...")

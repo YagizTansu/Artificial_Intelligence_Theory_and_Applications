@@ -1,4 +1,3 @@
-Self-Organizing Maps (SOMs)
 Self-Organizing Maps (SOMs) are feed-forward neural networks with a two-layered structure. They have local connections only among 
 neighboring output neurons, meaning each neuron is only connected to its neighboring neurons.
 
@@ -8,7 +7,8 @@ Input Layer: Receives a high-dimensional dataset from the outside.
 Output Layer: Calculates the final result.
 
 Input Layer
-The input layer consists of neurons that represent the features of the input data. Each neuron in the input layer corresponds to one component of the input feature vector. The input neurons are fully connected to all neurons in the output layer.
+The input layer consists of neurons that represent the features of the input data. Each neuron in the input layer corresponds to one 
+component of the input feature vector. The input neurons are fully connected to all neurons in the output layer.
 
 Output Layer
 In the output layer, each neuron calculates a distance function between the input vector and its weight vector. The activation function 
