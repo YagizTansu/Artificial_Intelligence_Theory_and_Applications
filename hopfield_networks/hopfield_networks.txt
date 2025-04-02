@@ -1,0 +1,34 @@
+Hopfield Networks
+HN's are recurrent neural Networks(it contains clycles but not self loop) It designed for Associative
+memory or Solving optimization problems. There is no hidden layer inside of HN's. Each neuron connected
+all other nueron in network except itself. The conneciton weights are symentric for example Neuron A to B 
+weight is equal to as B to A connection 
+
+There are 2 layer, these are input and output layer, Input funciton of each neuron is weighted sum of all
+input data from other neurons. The activation function of each neuron is treshold function. Otput function
+is itdentitiy funciton which means that calculated result equal to output.
+
+Convergence
+It is recurrent neural network behavior of network depends on update order of network neurons. It can be
+sequential or synchronous. synchronous lead to osilation we can not find optimal result direcly,
+If it is sequential(one after one), stable state is reached always reached in finite number of step.
+
+Assocative memory
+HN is easily use Assocative memory, which means it can find stored memories based on their content
+when you give it pattern it checks if the pattern matches a stored one even pattern has a noise.
+This works becasue the network has stable state. The weights and tresholds help the network to recognize
+the pattern by making them stable
+
+Solving Optimization problems
+We can use the energy funciton of Hopfield networks to solve optimization problem. To do this, we convert
+the problem as a energy function. Setup right weights and tresholds and then update the network until
+reachs the stable state. Each stable state represents a local minimum of the optimizaiton problem.
+However it cannot complex moves. This means that the solution we already find is only a local minimum.
+
+Simulated annelaing
+We can stuck on local minimum of the problem, Simulated annelaing hepls in this step. Simulated annelaing
+is accept worse solution for finding better solution in the future.If a new slution is better accept it,
+However if it is worse, accept that depends on temperature parameter. This parameter decrease over time.
+It is inspired from cooling of Metal and it is increasing the chance of finding a better overall 
+solution 
+
