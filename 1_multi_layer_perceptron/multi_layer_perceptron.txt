@@ -1,0 +1,59 @@
+Multi layer perceptron
+MLP is r layered a feed-forward neural network with stricly structered network. It is aclclic network There
+are not any cycles or loops in the mlps's network. Data flows from input to output layer. No any jumps between
+non-consequtive layers Each neuron connected the all neuron in previous layer. MLP's aloow significant processing
+cababilities by increasing the number of nuerons and layers
+
+Layer in MLP
+Input layer : recive input data from outside an pass it to hidden layer.
+Hidden layer : It can be one or more layer , make some calculations and operations on data and pass it to output layer 
+Output layer : calcualte and give final result of network
+
+Functions in MLP' network
+Input function of each neuron in the network is weighted sum function. This kind of functions combine input
+based on their weight value. Neurons take all inputs from each neuron in previos layer and combine with that
+function.
+Activation function of each neuron is sigmoid funciton. It is monotonically non-decreasing funciton with 
+interval (0,1). Also bipolar sigmoid fuction can be used for activation function this is also monotonically 
+non-decreasing with interval is (-1,1)
+The output function of ecah neuron is identity function it means actvaiton value equals to output.
+
+Function Approximation
+A four layer Multi layer perceptron can Approximate any rieman integrable funciton with high accuracy. This is
+done by breaking the funtion to small piece of steps and creating a neural network to represent it.
+
+Regression
+Traning mlps and regression is very similar process.In both of them Main topic is increasing error funciton typically mean error
+square function.
+Linear regression : linear relationship between quantities
+polnomial regreesion : add polynomial curves into linear regression. Extend lineer relationship with polnomial
+Multi lineer regreesion : fit for Multiple arguments
+Logistic regression : it uses a logistics function and it is very important for ANN's because ofently in can
+                    be used for activation function in ANN's
+
+Training
+For an mlp we are considering reducing error function on the network with given dataset. Training process used
+gradient descent and backpropagation process
+
+Gradient descent
+The gradient descent explain that how can we reduce the error on the network
++gradient shows that error increasing in which direction
++we have to go opposite direction of this gradients
+step size of going to direction is control with learning rate parameter if it is too low the process will to slow
+if it is too much function can not catch the local minimum
+This process continue to until reach the local minimum
+
+for this process activation and output funciton must de differentiable because error funciton must be differentiable
+for calculating dervaites
+
+For improving Training process
+random start point can be use because local minium does not always global minimum of funtion
+adaptive learning rate parameter can be used for optimize time and correcitons
+It can be use only sign of gradient (Manthan)
+
+backpropagation
+How can we propogate the error from putput layer to input layer
+Error computed at last step of network we need to propagate consequtivly from output layer to input layer
+
+Number of hidden neurons is realy important for MLP'shows ... 
+
